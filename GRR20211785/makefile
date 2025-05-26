@@ -4,7 +4,7 @@ LFLAGS =
 
 PROG = escalona
 
-SOURCE_DIRS = ./src/utils ./src/graph ./src/conflict 
+SOURCE_DIRS = ./src/query ./src/graph ./src/conflict 
 SOURCES = $(wildcard $(addsuffix /*.c, $(SOURCE_DIRS)))
 OBJS = $(patsubst %.c,%.o,$(SOURCES))
 

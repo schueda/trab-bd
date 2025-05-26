@@ -23,7 +23,7 @@ struct graph {
 };
 
 graphT *create_graph();
-void add_vertex(graphT *graph, int value);
+int add_vertex(graphT *graph, int value);
 void add_edge(graphT *graph, int from, int to);
 int find_vertex(graphT *graph, int id);
 void print_graph(graphT *graph);

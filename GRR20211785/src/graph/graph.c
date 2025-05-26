@@ -23,15 +23,23 @@ void destroy_edge(edgeT *edge) {
 graphT *create_graph() {
     graphT *graph = (graphT *) malloc(sizeof(graphT));
     graph->vertices = (vertexT **) malloc(MAX_VERTEX * sizeof(vertexT));
+    if (graph->vertices == NULL) {
+        return NULL;
+    }
+
     graph->vertices_count = 0;
 
     return graph;
 }
 
-void add_vertex(graphT *graph, int value) {
+int add_vertex(graphT *graph, int value) {
     vertexT *vertex = create_vertex(value);
+    if (vertex == NULL) {
+        return -1;
+    }
     graph->vertices[graph->vertices_count] = vertex;
     graph->vertices_count++;
+    return 0;
 }
 
 void add_edge(graphT *graph, int from, int to) {
