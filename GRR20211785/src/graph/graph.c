@@ -24,6 +24,7 @@ graphT *create_graph() {
     graphT *graph = (graphT *) malloc(sizeof(graphT));
     graph->vertices = (vertexT **) malloc(MAX_VERTEX * sizeof(vertexT));
     if (graph->vertices == NULL) {
+        free(graph);
         return NULL;
     }
 
@@ -62,7 +63,10 @@ int check_for_cycles(graphT *graph) {
     return 0;
 }
 
+int empty_graph(graphT *graph) {
+    return -1;
+}
+
 int destroy_graph(graphT *graph) {
-    printf("bfs to free everything.\n");
-    return 1;
+    return -1;
 }

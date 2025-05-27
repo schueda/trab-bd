@@ -21,7 +21,7 @@ void print_query(queryT *query);
 int destroy_query(queryT *query);
 
 //--------------------------------------------------------------
-#define TABLE_SIZE 16
+#define QUERY_TABLE_SIZE 16
 
 typedef struct query_node query_nodeT;
 struct query_node {
@@ -36,6 +36,7 @@ struct query_table {
 
 query_tableT *create_query_table();
 int query_table_insert(queryT *query, query_tableT *table);
+int empty_query_table(query_tableT *table);
 int destroy_query_table(query_tableT *table);
 
 #endif

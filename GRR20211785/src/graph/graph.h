@@ -28,6 +28,7 @@ void add_edge(graphT *graph, int from, int to);
 int find_vertex(graphT *graph, int id);
 void print_graph(graphT *graph);
 int check_for_cycles(graphT *graph);
+int empty_graph(graphT *graph);
 int destroy_graph(graphT *graph);
 
 #endif
