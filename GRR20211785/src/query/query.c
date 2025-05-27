@@ -11,7 +11,12 @@ queryT *create_query(char *buffer) {
         if (temp_operation != READ && temp_operation != WRITE && temp_operation != COMMIT) {
             free(query);
             return NULL;        
-        } 
+        }
+
+        if (query->transaction_id >= 10000) {
+            free(query);
+            return NULL;
+        }
 
         query->operation = (operationT) temp_operation;
         return query;
@@ -23,7 +28,8 @@ queryT *create_query(char *buffer) {
 
 int destroy_query(queryT *query) {
     if (query == NULL) { return -1; }
-    free(query);    
+    free(query);
+    query = NULL; 
     return 0;
 }
 

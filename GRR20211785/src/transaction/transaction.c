@@ -89,7 +89,7 @@ int compare_ints(const void *a, const void *b) {
 }
 
 int list_transactions(char *str, transaction_tableT *table) {
-    if (table == NULL || table->transactions == NULL) { return -1; }
+    if (str == NULL || table == NULL || table->transactions == NULL) { return -1; }
 
     int transactions[TRANSACTION_TABLE_SIZE];
     int j = 0;
@@ -101,10 +101,13 @@ int list_transactions(char *str, transaction_tableT *table) {
     qsort(transactions, j, sizeof(int), compare_ints);
 
     for (int i = 0; i < j; i++) {
-        char number[3];
-        sprintf(number, "%d", transactions[i]);
-        strlcat(str, number, strlen(str));
+        char number[8] = "";
+        sprintf(number, "%d,", transactions[i]);
+        strlcat(str, number, TRANSACTION_LIST_BUFFER);
     }
+
+    str[strlen(str)-1] = '\0';
+
     return 1;
 }
 
@@ -114,6 +117,7 @@ int empty_transaction_table(transaction_tableT *table) {
     for (int i = 0; i < TRANSACTION_TABLE_SIZE; i++) {
         if (table->transactions[i] !=  NULL) {
             free(table->transactions[i]);
+            table->transactions[i] = NULL;
         }
     }
 

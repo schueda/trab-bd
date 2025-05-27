@@ -43,7 +43,7 @@ int main(int argc, char const *argv[]) {
         }
     
         if (transaction_table->open_count <= 0) {
-            char tran_str[TRANSACTION_LIST_BUFFER];
+            char tran_str[TRANSACTION_LIST_BUFFER] = "";
             list_transactions(tran_str, transaction_table);
 
             char *result_serial = check_for_cycles(conflict_graph) ? "SS" : "NS";
