@@ -25,6 +25,12 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
+    conflictsT *conflicts = create_conflicts();
+    if (conflicts == NULL) {
+        perror("Não foi possível alocar a lista de conflitos.\n");
+        return 1;
+    }
+
     int schedule = 1;
 
     char buffer[INPUT_BUFFER];
@@ -39,10 +45,12 @@ int main(int argc, char const *argv[]) {
             commit_transaction(query->transaction_id, transaction_table);
             destroy_query(query);
         } else if (open_transaction(query->transaction_id, transaction_table) != -1) {
-            conflict_process_query(conflict_graph, query, query_table);
+            conflict_process_query(conflict_graph, query, query_table, conflicts);
+        } else {
+            return 1;
         }
     
-        if (transaction_table->open_count <= 0) {
+        if (transaction_table->open_count <= 0 && query_table->new_entries == 1) {
             char tran_str[TRANSACTION_LIST_BUFFER] = "";
             list_transactions(tran_str, transaction_table);
 
@@ -60,5 +68,6 @@ int main(int argc, char const *argv[]) {
     destroy_graph(conflict_graph);
     destroy_query_table(query_table);
     destroy_transaction_table(transaction_table);
+    destroy_conflicts(conflicts);
     return 0;
 }

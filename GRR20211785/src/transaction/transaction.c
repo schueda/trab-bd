@@ -30,55 +30,44 @@ int t_hash(int id) {
     return id % TRANSACTION_TABLE_SIZE;
 }
 
-int rec_open_transaction(int id, transaction_tableT *table, int inc) {
-    if (table == NULL || table->transactions == NULL) { return -1; }
-
-    int transaction_hash = t_hash(id + inc);
-    if (table->transactions[transaction_hash] == NULL) {
-        transactionT *transaction = create_transaction(id);
-        if (transaction == NULL) { return -1; }
-
-        table->transactions[transaction_hash] = transaction;
-        table->open_count++;
-        return 0;
-    } else if (table->transactions[transaction_hash]->id == id) {
-        return 1;
-    } else if (++inc >= TRANSACTION_TABLE_SIZE) {
-        perror("Tabela de transações cheia.\n");
-        return -1;
-    }
-    return rec_open_transaction(id, table, inc);
-}
-
 int open_transaction(int id, transaction_tableT *table) {
-    return rec_open_transaction(id, table, 0);
-}
-
-int rec_commit_transaction(int id, transaction_tableT *table, int inc) {
     if (table == NULL || table->transactions == NULL) { return -1; }
 
-    int transaction_hash = t_hash(id + inc);
-    if (table->transactions[transaction_hash] == NULL) {
-        printf("Commit em T%d sem operações\n", id);
-        return -1;
-    } else if (table->transactions[transaction_hash]->id == id) {
-        if (table->transactions[transaction_hash]->open == 1) {
-            table->transactions[transaction_hash]->open = 0;
-            table->open_count--;
+    for (int inc = 0; inc < TRANSACTION_TABLE_SIZE; inc++) {
+        int transaction_hash = t_hash(id + inc);
+        if (table->transactions[transaction_hash] == NULL) {
+            transactionT *transaction = create_transaction(id);
+            if (transaction == NULL) { return -1; }
+            
+            table->transactions[transaction_hash] = transaction;
+            table->open_count++;
+            return 0;
+        } else if (table->transactions[transaction_hash]->id == id) {
             return 1;
-        } else {
-            printf("Commit em T%d sem operações\n", id);
-            return -1;
-        }
-    } else if (++inc >= TRANSACTION_TABLE_SIZE) {
-        printf("Commit em T%d sem operações\n", id);
-        return -1;
+        } 
     }
-    return rec_commit_transaction(id, table, inc);
+    printf("Tabela de transações cheia. Não foi possível registrar a transação T%d.\n", id);
+    return -1;
 }
 
 int commit_transaction(int id, transaction_tableT *table) {
-    return rec_commit_transaction(id, table, 0);
+    if (table == NULL || table->transactions == NULL) { return -1; }
+
+    for (int inc = 0; inc < TRANSACTION_TABLE_SIZE; inc++) {
+        int transaction_hash = t_hash(id + inc);
+        if (table->transactions[transaction_hash] == NULL) { break; }
+        if (table->transactions[transaction_hash]->id == id) {
+            if (table->transactions[transaction_hash]->open == 1) {
+                table->transactions[transaction_hash]->open = 0;
+                table->open_count--;
+                return 1;
+            } else {
+                break;
+            }
+        }
+    }    
+    printf("Commit em T%d sem operações\n", id);
+    return -1;
 }
 
 int compare_ints(const void *a, const void *b) {

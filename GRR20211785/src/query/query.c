@@ -66,30 +66,53 @@ int q_hash(char c) {
     return (int) c % QUERY_TABLE_SIZE; 
 }
 
-int rec_query_table_insert(queryT *query, query_tableT *table, int inc) {
-    if (query == NULL || table == NULL || table->nodes == NULL) { return -1; }
+int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
+    if (qi->transaction_id == qj->transaction_id) { return 0; }
 
-    int query_hash = q_hash(query->resource + inc);
-    if (table->nodes[query_hash] == NULL) {
-        query_nodeT *query_node = create_query_node(query);
-        if (query_node == NULL) { return -1; }
-
-        table->nodes[query_hash] = query_node;
-        return 0;
-    } else if (table->nodes[query_hash]->query->resource == query->resource) {
+    if (qj->operation == WRITE || (qj->operation == READ && qi->operation == WRITE)) {
+        if (conflicts->count >= CONFLICTS_MAX_SIZE) { return -1; }
+        
+        conflicts->transactions[conflicts->count] = qi->transaction_id;
+        conflicts->count++;
         return 1;
-    } else if (++inc >= QUERY_TABLE_SIZE) { 
-        perror("Tabela de Query cheia.");
-        return -1; 
     }
-    return rec_query_table_insert(query, table, inc);
+    return 0;
 }
 
-int query_table_insert(queryT *query, query_tableT *table) {
-    return rec_query_table_insert(query, table, 0);
+int query_table_insert(queryT *query, query_tableT *table, conflictsT *conflicts) {
+    if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL) { return -1; }
+
+    for (int inc = 0; inc < QUERY_TABLE_SIZE; inc++) {
+        int query_hash = q_hash(query->resource + inc);
+        if (table->nodes[query_hash] == NULL) {
+            query_nodeT *query_node = create_query_node(query);
+            if (query_node == NULL) { return -1; }
+    
+            table->nodes[query_hash] = query_node;
+
+            table->new_entries = 1;
+            return 0;
+        } else if (table->nodes[query_hash]->query->resource == query->resource) {
+            query_nodeT *node = table->nodes[query_hash];
+            while(node->next != NULL) {
+                compare(node->query, query, conflicts);
+                node = node->next;
+            }
+
+            compare(node->query, query, conflicts);
+            node->next = create_query_node(query);
+
+            table->new_entries = 1;
+            return 1;
+        } 
+    }
+
+    perror("Tabela de Query cheia.");
+    return -1; 
 }
 
 int empty_query_table(query_tableT *table) {
+    table->new_entries = 0;
     return -1;
 }
 

@@ -1,6 +1,8 @@
 #ifndef __QUERY__
 #define __QUERY__
 
+#include "../conflict/conflict.h"
+
 typedef enum query_op operationT; 
 enum query_op {
     READ = 'R',
@@ -32,10 +34,11 @@ struct query_node {
 typedef struct query_table query_tableT;
 struct query_table {
     query_nodeT **nodes;
+    int new_entries;
 };
 
 query_tableT *create_query_table();
-int query_table_insert(queryT *query, query_tableT *table);
+int query_table_insert(queryT *query, query_tableT *table, conflictsT *conflicts);
 int empty_query_table(query_tableT *table);
 int destroy_query_table(query_tableT *table);
 
