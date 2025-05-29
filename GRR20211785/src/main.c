@@ -61,7 +61,7 @@ int main(int argc, char const *argv[]) {
             empty_graph(conflict_graph);
             empty_query_table(query_table);
             empty_transaction_table(transaction_table);
-            schedule ++;
+            schedule++;
         }
     }
     
