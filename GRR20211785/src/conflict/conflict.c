@@ -5,7 +5,7 @@
 
 conflictsT *create_conflicts() {
     conflictsT *conflicts = (conflictsT *) malloc(sizeof(conflictsT));
-    if (conflicts == NULL) { return NULL; }
+    if (conflicts == NULL) return NULL;
 
     conflicts->transactions = (int *) malloc(CONFLICTS_MAX_SIZE * sizeof(int));
     if (conflicts->transactions == NULL) {
@@ -32,5 +32,12 @@ void conflict_process_query(graphT *graph, queryT *query, query_tableT *query_ta
 }
 
 int destroy_conflicts(conflictsT *conflicts) {
-    return -1;
+    if (conflicts == NULL) return -1;
+
+    if (conflicts->transactions != NULL) {
+        free(conflicts->transactions);
+    }
+
+    free(conflicts);
+    return 0;
 }

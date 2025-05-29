@@ -4,7 +4,7 @@
 
 queryT *create_query(char *buffer) {
     queryT *query = (queryT *) malloc(sizeof(queryT));
-    if (query == NULL) { return NULL; }
+    if (query == NULL) return NULL;
 
     char temp_operation;
     if (sscanf(buffer, "%d %d %c %c", &query->timestamp, &query->transaction_id, &temp_operation, &query->resource)) {
@@ -27,7 +27,8 @@ queryT *create_query(char *buffer) {
 }
 
 int destroy_query(queryT *query) {
-    if (query == NULL) { return -1; }
+    if (query == NULL) return -1;
+
     free(query);
     query = NULL; 
     return 0;
@@ -42,8 +43,8 @@ void print_query(queryT *query) {
 
 query_tableT *create_query_table() {
     query_tableT *query_table = (query_tableT *) malloc(sizeof(query_tableT));
+    if (query_table == NULL) return NULL;
 
-    if (query_table == NULL) { return NULL; }
     query_table->nodes = (query_nodeT **) malloc(QUERY_TABLE_SIZE * sizeof(query_nodeT));
     if (query_table->nodes == NULL) {
         free(query_table);
@@ -67,10 +68,10 @@ int q_hash(char c) {
 }
 
 int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
-    if (qi->transaction_id == qj->transaction_id) { return 0; }
+    if (qi->transaction_id == qj->transaction_id) return 0;
 
     if (qj->operation == WRITE || (qj->operation == READ && qi->operation == WRITE)) {
-        if (conflicts->count >= CONFLICTS_MAX_SIZE) { return -1; }
+        if (conflicts->count >= CONFLICTS_MAX_SIZE) return -1;
         
         conflicts->transactions[conflicts->count] = qi->transaction_id;
         conflicts->count++;
@@ -80,13 +81,13 @@ int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
 }
 
 int query_table_insert(queryT *query, query_tableT *table, conflictsT *conflicts) {
-    if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL) { return -1; }
+    if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL) return -1;
 
     for (int inc = 0; inc < QUERY_TABLE_SIZE; inc++) {
         int query_hash = q_hash(query->resource + inc);
         if (table->nodes[query_hash] == NULL) {
             query_nodeT *query_node = create_query_node(query);
-            if (query_node == NULL) { return -1; }
+            if (query_node == NULL) return -1;
     
             table->nodes[query_hash] = query_node;
 
@@ -111,11 +112,44 @@ int query_table_insert(queryT *query, query_tableT *table, conflictsT *conflicts
     return -1; 
 }
 
+int destroy_query_node(query_nodeT *node) {
+    if (node == NULL) return -1;
+
+    if (node->query != NULL) {
+        free(node->query);
+    }
+
+    free(node);
+    return 0;
+}
+
 int empty_query_table(query_tableT *table) {
+    if (table == NULL || table->nodes == NULL) return -1; 
     table->new_entries = 0;
-    return -1;
+
+    for (int i = 0; i < QUERY_TABLE_SIZE; i++) {
+        query_nodeT *node = table->nodes[i];
+        while (node != NULL) {
+            query_nodeT *next_node = node->next;
+            destroy_query_node(node);
+            node = next_node;
+        }
+        table->nodes[i] = NULL;
+    }
+
+    return 0;
 }
 
 int destroy_query_table(query_tableT *table) {
-    return -1;
+    if (table == NULL) return -1;
+
+    empty_query_table(table);
+
+    if (table->nodes != NULL) {
+        free(table->nodes);
+    }
+
+    free(table);
+
+    return 0;
 }

@@ -19,7 +19,7 @@ transaction_tableT *create_transaction_table() {
 
 transactionT *create_transaction(int id) {
     transactionT *transaction = (transactionT *) malloc(sizeof(transactionT));
-    if (transaction == NULL) { return NULL; }
+    if (transaction == NULL) return NULL;
 
     transaction->id = id;
     transaction->open = 1;
@@ -31,13 +31,13 @@ int t_hash(int id) {
 }
 
 int open_transaction(int id, transaction_tableT *table) {
-    if (table == NULL || table->transactions == NULL) { return -1; }
+    if (table == NULL || table->transactions == NULL) return -1;
 
     for (int inc = 0; inc < TRANSACTION_TABLE_SIZE; inc++) {
         int transaction_hash = t_hash(id + inc);
         if (table->transactions[transaction_hash] == NULL) {
             transactionT *transaction = create_transaction(id);
-            if (transaction == NULL) { return -1; }
+            if (transaction == NULL) return -1;
             
             table->transactions[transaction_hash] = transaction;
             table->open_count++;
@@ -51,14 +51,16 @@ int open_transaction(int id, transaction_tableT *table) {
 }
 
 int commit_transaction(int id, transaction_tableT *table) {
-    if (table == NULL || table->transactions == NULL) { return -1; }
+    if (table == NULL || table->transactions == NULL) return -1;
 
     for (int inc = 0; inc < TRANSACTION_TABLE_SIZE; inc++) {
         int transaction_hash = t_hash(id + inc);
-        if (table->transactions[transaction_hash] == NULL) { break; }
-        if (table->transactions[transaction_hash]->id == id) {
-            if (table->transactions[transaction_hash]->open == 1) {
-                table->transactions[transaction_hash]->open = 0;
+        transactionT *transaction = table->transactions[transaction_hash];
+        if (transaction == NULL) break;
+
+        if (transaction->id == id) {
+            if (transaction->open == 1) {
+                transaction->open = 0;
                 table->open_count--;
                 return 1;
             } else {
@@ -78,7 +80,7 @@ int compare_ints(const void *a, const void *b) {
 }
 
 int list_transactions(char *str, transaction_tableT *table) {
-    if (str == NULL || table == NULL || table->transactions == NULL) { return -1; }
+    if (str == NULL || table == NULL || table->transactions == NULL) return -1;
 
     int transactions[TRANSACTION_TABLE_SIZE];
     int j = 0;
@@ -101,7 +103,7 @@ int list_transactions(char *str, transaction_tableT *table) {
 }
 
 int empty_transaction_table(transaction_tableT *table) {
-    if (table == NULL || table->transactions == NULL) { return -1; }
+    if (table == NULL || table->transactions == NULL) return -1;
 
     for (int i = 0; i < TRANSACTION_TABLE_SIZE; i++) {
         if (table->transactions[i] !=  NULL) {
@@ -115,6 +117,15 @@ int empty_transaction_table(transaction_tableT *table) {
 }
 
 int destroy_transaction_table(transaction_tableT *table) {
+    if (table == NULL) return -1;
+
     empty_transaction_table(table);
+
+    if (table->transactions != NULL) {
+        free(table->transactions);
+    }
+
+    free(table);
+
     return -1;
 }
