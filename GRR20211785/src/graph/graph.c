@@ -8,55 +8,96 @@ vertexT *create_vertex(int value) {
     return vertex;
 }
 
-void destroy_vertex(vertexT *vertex) {
+int destroy_vertex(vertexT *vertex) {
 
 }
 
-edgeT *create_edge(int destination) {
-    return NULL;
+edgeT *create_edge(vertexT *dest_vertex) {
+    edgeT *edge = (edgeT *) malloc(sizeof(edgeT));
+    if (edge == NULL) return NULL;
+
+    edge->to_vertex = dest_vertex;
+    edge->next = NULL;
+
+    return edge;
 }
 
-void destroy_edge(edgeT *edge) {
+int destroy_edge(edgeT *edge) {
 
 }
 
 graphT *create_graph() {
     graphT *graph = (graphT *) malloc(sizeof(graphT));
-    graph->vertices = (vertexT **) malloc(MAX_VERTEX * sizeof(vertexT));
+    graph->vertices = (vertexT **) malloc(MAX_VERTICES * sizeof(vertexT));
     if (graph->vertices == NULL) {
         free(graph);
         return NULL;
     }
 
-    graph->vertices_count = 0;
-
     return graph;
 }
 
-int add_vertex(graphT *graph, int value) {
-    vertexT *vertex = create_vertex(value);
-    if (vertex == NULL) {
-        return -1;
-    }
-    graph->vertices[graph->vertices_count] = vertex;
-    graph->vertices_count++;
-    return 0;
+int g_hash(int id) {
+    return id % MAX_VERTICES;
 }
 
-void add_edge(graphT *graph, int from, int to) {
+vertexT *get_vertex(graphT *graph, int value) {
+    if (graph == NULL) return NULL;
 
-}
-
-int find_vertex(graphT *graph, int id) {
-    for (int i = 0; i < graph->vertices_count; i++) {
-        if (graph->vertices[i]->value == id) {
-            return 1;
+    for (int inc = 0; inc < MAX_VERTICES; inc++) {
+        int vertex_hash = g_hash(value + inc);
+        vertexT *vertex = graph->vertices[vertex_hash];
+        if (vertex == NULL) {
+            graph->vertices[vertex_hash] = create_vertex(value);
+            return graph->vertices[vertex_hash];
+        } else if (vertex->value == value) {
+            return vertex;
         }
     }
-    return 0;
+
+    perror("Grafo não pode mais receber novos vértices...\n");
+    return NULL;
+}
+
+int add_edge(graphT *graph, int from, int to) {
+    if (graph == NULL) return -1;
+
+    vertexT *origin_vertex = get_vertex(graph, from);
+    vertexT *dest_vertex = get_vertex(graph, to);
+    if (origin_vertex == NULL || dest_vertex == NULL) return -1;
+    
+    if (origin_vertex->frontier == NULL) {
+        origin_vertex->frontier = create_edge(dest_vertex);
+        return 1;
+    }
+
+    edgeT *prev_edge = NULL;
+    edgeT *edge = origin_vertex->frontier;
+    while (edge != NULL) {
+        if (edge->to_vertex == dest_vertex) return 0;
+
+        prev_edge = edge;
+        edge = edge->next;
+    }
+    prev_edge->next = create_edge(dest_vertex);
+    return 1;
 }
 
 void print_graph(graphT *graph) {
+    if (graph == NULL) return;
+
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        if (graph->vertices[i] != NULL) {
+            printf("%d:", graph->vertices[i]->value);
+
+            edgeT *edge = graph->vertices[i]->frontier;
+            while (edge != NULL) {
+                printf(" %d", edge->to_vertex->value);
+                edge = edge->next;
+            }
+            printf("\n");
+        }
+    }
 }
 
 int check_for_cycles(graphT *graph) {
@@ -64,9 +105,7 @@ int check_for_cycles(graphT *graph) {
 }
 
 int empty_graph(graphT *graph) {
-    return -1;
 }
 
 int destroy_graph(graphT *graph) {
-    return -1;
 }
