@@ -41,17 +41,17 @@ void print_query(queryT *query) {
     printf("resource: %c\n", query->resource);
 }
 
-query_tableT *create_query_table() {
-    query_tableT *query_table = (query_tableT *) malloc(sizeof(query_tableT));
-    if (query_table == NULL) return NULL;
+conflict_query_tableT *create_conflict_query_table() {
+    conflict_query_tableT *conflict_query_table = (conflict_query_tableT *) malloc(sizeof(conflict_query_tableT));
+    if (conflict_query_table == NULL) return NULL;
 
-    query_table->nodes = (query_nodeT **) malloc(QUERY_TABLE_SIZE * sizeof(query_nodeT));
-    if (query_table->nodes == NULL) {
-        free(query_table);
+    conflict_query_table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT));
+    if (conflict_query_table->nodes == NULL) {
+        free(conflict_query_table);
         return NULL;
     }
 
-    return query_table;
+    return conflict_query_table;
 }
 
 query_nodeT *create_query_node(queryT *query) {
@@ -64,7 +64,7 @@ query_nodeT *create_query_node(queryT *query) {
 }
 
 int q_hash(char c) {
-    return (int) c % QUERY_TABLE_SIZE; 
+    return (int) c % CONFLICT_QUERY_TABLE_SIZE; 
 }
 
 int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
@@ -80,10 +80,10 @@ int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
     return 0;
 }
 
-int query_table_insert(queryT *query, query_tableT *table, conflictsT *conflicts) {
+int conflict_query_table_insert(queryT *query, conflict_query_tableT *table, conflictsT *conflicts) {
     if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL) return -1;
 
-    for (int inc = 0; inc < QUERY_TABLE_SIZE; inc++) {
+    for (int inc = 0; inc < CONFLICT_QUERY_TABLE_SIZE; inc++) {
         int query_hash = q_hash(query->resource + inc);
         if (table->nodes[query_hash] == NULL) {
             query_nodeT *query_node = create_query_node(query);
@@ -123,11 +123,11 @@ int destroy_query_node(query_nodeT *node) {
     return 0;
 }
 
-int empty_query_table(query_tableT *table) {
+int empty_conflict_query_table(conflict_query_tableT *table) {
     if (table == NULL || table->nodes == NULL) return -1; 
     table->new_entries = 0;
 
-    for (int i = 0; i < QUERY_TABLE_SIZE; i++) {
+    for (int i = 0; i < CONFLICT_QUERY_TABLE_SIZE; i++) {
         query_nodeT *node = table->nodes[i];
         while (node != NULL) {
             query_nodeT *next_node = node->next;
@@ -140,10 +140,10 @@ int empty_query_table(query_tableT *table) {
     return 0;
 }
 
-int destroy_query_table(query_tableT *table) {
+int destroy_conflict_query_table(conflict_query_tableT *table) {
     if (table == NULL) return -1;
 
-    empty_query_table(table);
+    empty_conflict_query_table(table);
 
     if (table->nodes != NULL) {
         free(table->nodes);

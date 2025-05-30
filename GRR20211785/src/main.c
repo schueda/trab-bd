@@ -13,9 +13,9 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    query_tableT *query_table = create_query_table();
-    if (query_table == NULL) {
-        perror("Não foi possível alocar a tabela de query.\n");
+    conflict_query_tableT *conflict_query_table = create_conflict_query_table();
+    if (conflict_query_table == NULL) {
+        perror("Não foi possível alocar a tabela de query de conflitos.\n");
         return 1;
     }
 
@@ -45,12 +45,12 @@ int main(int argc, char const *argv[]) {
             commit_transaction(query->transaction_id, transaction_table);
             destroy_query(query);
         } else if (open_transaction(query->transaction_id, transaction_table) != -1) {
-            conflict_process_query(conflict_graph, query, query_table, conflicts);
+            conflict_process_query(conflict_graph, query, conflict_query_table, conflicts);
         } else {
             return 1;
         }
     
-        if (transaction_table->open_count <= 0 && query_table->new_entries == 1) {
+        if (transaction_table->open_count <= 0 && conflict_query_table->new_entries == 1) {
             char tran_str[TRANSACTION_LIST_BUFFER] = "";
             list_transactions(tran_str, transaction_table);
 
@@ -59,14 +59,14 @@ int main(int argc, char const *argv[]) {
             printf("%d %s %s\n", schedule, tran_str, result_serial);
 
             empty_graph(conflict_graph);
-            empty_query_table(query_table);
+            empty_conflict_query_table(conflict_query_table);
             empty_transaction_table(transaction_table);
             schedule++;
         }
     }
     
     destroy_graph(conflict_graph);
-    destroy_query_table(query_table);
+    destroy_conflict_query_table(conflict_query_table);
     destroy_transaction_table(transaction_table);
     destroy_conflicts(conflicts);
     return 0;
