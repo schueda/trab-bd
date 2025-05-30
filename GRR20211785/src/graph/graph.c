@@ -9,7 +9,10 @@ vertexT *create_vertex(int value) {
 }
 
 int destroy_vertex(vertexT *vertex) {
+    if (vertex == NULL) return -1;
 
+    free(vertex);
+    return 0;
 }
 
 edgeT *create_edge(vertexT *dest_vertex) {
@@ -23,7 +26,10 @@ edgeT *create_edge(vertexT *dest_vertex) {
 }
 
 int destroy_edge(edgeT *edge) {
+    if (edge == NULL) return -1;
 
+    free(edge);
+    return 0;
 }
 
 graphT *create_graph() {
@@ -42,7 +48,7 @@ int g_hash(int id) {
 }
 
 vertexT *get_vertex(graphT *graph, int value) {
-    if (graph == NULL) return NULL;
+    if (graph == NULL || graph->vertices == NULL) return NULL;
 
     for (int inc = 0; inc < MAX_VERTICES; inc++) {
         int vertex_hash = g_hash(value + inc);
@@ -59,11 +65,8 @@ vertexT *get_vertex(graphT *graph, int value) {
     return NULL;
 }
 
-int add_edge(graphT *graph, int from, int to) {
+int add_edge(graphT *graph, vertexT *origin_vertex, vertexT *dest_vertex) {
     if (graph == NULL) return -1;
-
-    vertexT *origin_vertex = get_vertex(graph, from);
-    vertexT *dest_vertex = get_vertex(graph, to);
     if (origin_vertex == NULL || dest_vertex == NULL) return -1;
     
     if (origin_vertex->frontier == NULL) {
@@ -84,7 +87,7 @@ int add_edge(graphT *graph, int from, int to) {
 }
 
 void print_graph(graphT *graph) {
-    if (graph == NULL) return;
+    if (graph == NULL || graph->vertices == NULL) return;
 
     for (int i = 0; i < MAX_VERTICES; i++) {
         if (graph->vertices[i] != NULL) {
@@ -105,7 +108,31 @@ int check_for_cycles(graphT *graph) {
 }
 
 int empty_graph(graphT *graph) {
+    if (graph == NULL || graph->vertices == NULL) return -1;
+
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        vertexT *vertex = graph->vertices[i];
+        if (vertex != NULL) {
+            edgeT *edge = vertex->frontier;
+            while (edge != NULL) {
+                edgeT *next_edge = edge->next;
+                destroy_edge(edge);
+                edge = next_edge;
+            }
+        }
+        destroy_vertex(vertex);
+        graph->vertices[i] = NULL;
+    }
+
+    return 0;
 }
 
 int destroy_graph(graphT *graph) {
+    if (graph == NULL) return -1;
+    empty_graph(graph);
+    if (graph->vertices != NULL) {
+        free(graph->vertices);
+    }
+    free(graph);
+    return 0;
 }

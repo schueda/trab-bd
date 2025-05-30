@@ -22,7 +22,8 @@ struct graph {
 };
 
 graphT *create_graph();
-int add_edge(graphT *graph, int from, int to);
+vertexT *get_vertex(graphT *graph, int value);
+int add_edge(graphT *graph, vertexT *origin_vertex, vertexT *dest_vertex);
 void print_graph(graphT *graph);
 int check_for_cycles(graphT *graph);
 int empty_graph(graphT *graph);

@@ -19,8 +19,10 @@ conflictsT *create_conflicts() {
 void conflict_process_query(graphT *graph, queryT *query, query_tableT *query_table, conflictsT *conflicts) {
     query_table_insert(query, query_table, conflicts);
 
+    vertexT *dest_vertex = get_vertex(graph, query->transaction_id);
     for (int i = 0; i < conflicts->count; i++) {
-        add_edge(graph, conflicts->transactions[i], query->transaction_id);
+        vertexT *origin_vertex = get_vertex(graph, conflicts->transactions[i]);
+        add_edge(graph, origin_vertex, dest_vertex);
         printf("(%d, %d)\n", conflicts->transactions[i], query->transaction_id);
     }
     conflicts->count = 0;
