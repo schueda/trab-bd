@@ -4,7 +4,7 @@
 #include "transaction.h"
 
 transaction_tableT *create_transaction_table() {
-    transaction_tableT *table = (transaction_tableT *) malloc(sizeof(table));
+    transaction_tableT *table = (transaction_tableT *) malloc(sizeof(transaction_tableT));
     if (table != NULL) {
         table->transactions = (transactionT **) malloc(TRANSACTION_TABLE_SIZE * sizeof(transactionT));
         if (table->transactions == NULL) { 
