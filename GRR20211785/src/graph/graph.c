@@ -5,6 +5,8 @@
 vertexT *create_vertex(int value) {
     vertexT *vertex = (vertexT *) malloc(sizeof(vertexT));
     vertex->value = value;
+
+    vertex->visited = 0;
     return vertex;
 }
 
@@ -103,7 +105,33 @@ void print_graph(graphT *graph) {
     }
 }
 
+int bfs(vertexT *r) {
+    r->visited = 1;
+
+    edgeT *edge = r->frontier;
+    while (edge != NULL) {
+        vertexT *neighbor = edge->to_vertex;
+        if (neighbor->visited == 1) {
+            return 1;
+        } else if (neighbor->visited == 0) {
+            return bfs(neighbor);
+        }
+        edge = edge->next;
+    }
+    return 0;
+}
+
 int check_for_cycles(graphT *graph) {
+    if (graph == NULL || graph->vertices == NULL) return -1;
+    
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        vertexT *cur_vertex = graph->vertices[i];
+        if (cur_vertex != NULL && cur_vertex->visited == 0) {
+            if (bfs(cur_vertex)) {
+                return 1;
+            }
+        }
+    }
     return 0;
 }
 

@@ -54,9 +54,7 @@ int main(int argc, char const *argv[]) {
             char tran_str[TRANSACTION_LIST_BUFFER] = "";
             list_transactions(tran_str, transaction_table);
 
-            print_graph(conflict_graph);
-
-            char *result_serial = check_for_cycles(conflict_graph) ? "SS" : "NS";
+            char *result_serial = check_for_cycles(conflict_graph) ? "NS" : "SS";
 
             printf("%d %s %s\n", schedule, tran_str, result_serial);
 

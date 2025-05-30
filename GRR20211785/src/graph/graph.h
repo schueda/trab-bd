@@ -3,7 +3,7 @@
 
 typedef struct edge edgeT;
 typedef struct vertex vertexT;
-typedef struct graph graphT;
+typedef struct graphS graphT;
 
 #define MAX_VERTICES 16
 
@@ -15,9 +15,11 @@ struct edge {
 struct vertex {
     int value;
     edgeT *frontier;
+
+    int visited;
 };
 
-struct graph {
+struct graphS {
     vertexT **vertices;
 };
 
