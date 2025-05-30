@@ -94,7 +94,7 @@ int list_transactions(char *str, transaction_tableT *table) {
     for (int i = 0; i < j; i++) {
         char number[8] = "";
         sprintf(number, "%d,", transactions[i]);
-        strlcat(str, number, TRANSACTION_LIST_BUFFER);
+        strncat(str, number, TRANSACTION_LIST_BUFFER);
     }
 
     str[strlen(str)-1] = '\0';
