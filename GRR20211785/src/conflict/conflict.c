@@ -63,8 +63,7 @@ int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
     if (qj->operation == WRITE || (qj->operation == READ && qi->operation == WRITE)) {
         if (conflicts->count >= CONFLICTS_MAX_SIZE) return -1;
         
-        conflicts->transactions[conflicts->count] = qi->transaction_id;
-        conflicts->count++;
+        conflicts->transactions[conflicts->count++] = qi->transaction_id;
         return 1;
     }
     return 0;
