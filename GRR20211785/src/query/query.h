@@ -28,4 +28,7 @@ queryT *create_query(char *buffer);
 void print_query(queryT *query);
 int destroy_query(queryT *query);
 
+query_nodeT *create_query_node(queryT *query);
+int destroy_query_node(query_nodeT *node);
+
 #endif
