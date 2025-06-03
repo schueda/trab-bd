@@ -36,7 +36,7 @@ int destroy_edge(edgeT *edge) {
 
 graphT *create_graph() {
     graphT *graph = (graphT *) malloc(sizeof(graphT));
-    graph->vertices = (vertexT **) malloc(MAX_VERTICES * sizeof(vertexT));
+    graph->vertices = (vertexT **) malloc(MAX_VERTICES * sizeof(vertexT *));
     if (graph->vertices == NULL) {
         free(graph);
         return NULL;

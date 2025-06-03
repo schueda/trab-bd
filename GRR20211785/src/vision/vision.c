@@ -80,7 +80,7 @@ int check_equivalent_vision(vision_query_tableT *table) {
     if (table == NULL || table->nodes == NULL) return -1;
     if (table->number_of_transactions == 0) return 1;
 
-    query_nodeT **transactions = (query_nodeT **) malloc(table->number_of_transactions * sizeof(query_nodeT));
+    query_nodeT **transactions = (query_nodeT **) malloc(table->number_of_transactions * sizeof(query_nodeT *));
     int t_pos = 0;
     for (int i = 0; i < VISION_QUERY_TABLE_SIZE; i ++) {
         if (table->nodes[i] != NULL)
@@ -96,7 +96,7 @@ vision_query_tableT *create_vision_query_table() {
     vision_query_tableT *table = (vision_query_tableT *) malloc(sizeof(vision_query_tableT));
     if (table == NULL) return NULL;
     
-    table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT));
+    table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT *));
     if (table->nodes == NULL) {
         free(table);
         return NULL;

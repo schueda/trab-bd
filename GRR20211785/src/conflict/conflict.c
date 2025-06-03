@@ -44,7 +44,7 @@ conflict_query_tableT *create_conflict_query_table() {
     conflict_query_tableT *table = (conflict_query_tableT *) malloc(sizeof(conflict_query_tableT));
     if (table == NULL) return NULL;
 
-    table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT));
+    table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT *));
     if (table->nodes == NULL) {
         free(table);
         return NULL;
