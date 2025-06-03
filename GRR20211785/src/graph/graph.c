@@ -105,7 +105,7 @@ void print_graph(graphT *graph) {
     }
 }
 
-int bfs(vertexT *r) {
+int dfs(vertexT *r) {
     r->visited = 1;
 
     edgeT *edge = r->frontier;
@@ -114,10 +114,14 @@ int bfs(vertexT *r) {
         if (neighbor->visited == 1) {
             return 1;
         } else if (neighbor->visited == 0) {
-            return bfs(neighbor);
+            if (dfs(neighbor)) {
+                return 1;
+            }
         }
         edge = edge->next;
     }
+
+    r->visited = 2;
     return 0;
 }
 
@@ -127,7 +131,7 @@ int check_for_cycles(graphT *graph) {
     for (int i = 0; i < MAX_VERTICES; i++) {
         vertexT *cur_vertex = graph->vertices[i];
         if (cur_vertex != NULL && cur_vertex->visited == 0) {
-            if (bfs(cur_vertex)) {
+            if (dfs(cur_vertex)) {
                 return 1;
             }
         }
