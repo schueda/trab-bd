@@ -3,6 +3,38 @@
 #include "vision.h"
 
 int vision_query_table_insert(queryT *query, vision_query_tableT *table);
+int empty_w_timestamps(w_timestampT **w_timestamps);
+
+int r_hash(char resource) {
+    return (int) resource % VISION_RESOURCE_TABLE_SIZE;
+}
+
+w_timestampT *create_w_timestamp(char resource, int timestamp) {
+    w_timestampT *w_timestamp = (w_timestampT *) malloc(sizeof(w_timestamp));
+    w_timestamp->resource = resource;
+    w_timestamp->timestamp = timestamp;
+    return w_timestamp;
+}
+
+int w_timestamps_insert(queryT *query, w_timestampT **w_timestamps) {
+    if (query == NULL || w_timestamps == NULL) return -1;
+
+    for (int inc = 0; inc < VISION_RESOURCE_TABLE_SIZE; inc++) {
+        int resource_hash = r_hash(query->resource + inc);
+        if (w_timestamps[resource_hash] == NULL) {
+            w_timestamps[resource_hash] = create_w_timestamp(query->resource, query->timestamp);
+            return 0;
+        }
+        if (w_timestamps[resource_hash]->resource == query->resource) {
+            w_timestamps[resource_hash]->timestamp = query->timestamp;
+            return 1;
+        }
+    }
+
+    perror("Tabela query de últimas escritas cheia.");
+    return -1; 
+}
+
 
 int vision_process_query(queryT *query, vision_query_tableT *table) {
     if (query == NULL) return -1;
@@ -10,7 +42,7 @@ int vision_process_query(queryT *query, vision_query_tableT *table) {
     vision_query_table_insert(query, table);
 
     if (query->operation == WRITE)
-        table->last_write_timestamp = query->timestamp;
+        w_timestamps_insert(query, table->w_timestamps);
 
     return 0;
 }
@@ -21,21 +53,45 @@ void swap(query_nodeT **n1, query_nodeT **n2) {
     *n1 = aux;
 }
 
+int get_timestamp(char resource, w_timestampT **w_timestamps) {
+    if (w_timestamps == NULL) return -1;
+
+    for (int inc = 0; inc < VISION_RESOURCE_TABLE_SIZE; inc++) {
+        int resource_hash = r_hash(resource + inc);
+        if (w_timestamps[resource_hash] == NULL) return -1;
+
+        if (w_timestamps[resource_hash]->resource == resource) 
+            return w_timestamps[resource_hash]->timestamp;
+    }
+
+    return -1;
+}
+
 int serial_equivalent(query_nodeT **transactions, vision_query_tableT *table) {
     int n = table->number_of_transactions;
-    query_nodeT *node_n = transactions[n-1];
-
-    int last_write_timestamp = 0;
-    while (node_n != NULL) {
-        if (node_n->query->operation == WRITE) {
-            last_write_timestamp = node_n->query->timestamp;
+ 
+    w_timestampT **w_timestamps = (w_timestampT **) malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
+    for (int i = 0; i < n; i++) {
+        query_nodeT *node_i = table->nodes[i];
+        while (node_i != NULL) {
+            if (node_i->query->operation == WRITE) {
+                w_timestamps_insert(node_i->query, w_timestamps);
+            }
+            node_i = node_i->next;
         }
-        node_n = node_n->next;
     }
 
-    if (last_write_timestamp != table->last_write_timestamp) {
-        return 0;
+    for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
+        if (w_timestamps[i] != NULL) {
+            int og_timestamp = get_timestamp(w_timestamps[i]->resource, table->w_timestamps);
+            if (og_timestamp != w_timestamps[i]->timestamp) {
+                return 0;
+            }
+        }
     }
+
+    empty_w_timestamps(w_timestamps);
+    free(w_timestamps);
 
     for (int i = 0; i < n-1; i++) {
         for (int j = i + 1; j < n; j++) {
@@ -101,9 +157,14 @@ vision_query_tableT *create_vision_query_table() {
         free(table);
         return NULL;
     }
+    table->w_timestamps = (w_timestampT **) malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
+    if (table->w_timestamps == NULL) {
+        free(table->nodes);
+        free(table);
+        return NULL;
+    }
 
     table->number_of_transactions = 0;
-    table->last_write_timestamp = 0;
     return table;
 }
 
@@ -136,8 +197,28 @@ int vision_query_table_insert(queryT *query, vision_query_tableT *table) {
     return -1; 
 }
 
+int destroy_w_timestamp(w_timestampT *w_timestamp) {
+    if (w_timestamp == NULL) return -1;
+    
+    free(w_timestamp);
+    return 0;
+}
+
+int empty_w_timestamps(w_timestampT **w_timestamps) {
+    if (w_timestamps == NULL) return -1;
+
+    for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
+        if(w_timestamps[i] != NULL) {
+            destroy_w_timestamp(w_timestamps[i]);
+            w_timestamps[i] = NULL;
+        }
+    }
+
+    return 0;
+}
+
 int empty_vision_query_table(vision_query_tableT *table) {
-    if (table == NULL || table->nodes == NULL) return -1; 
+    if (table == NULL || table->nodes == NULL || table->w_timestamps == NULL) return -1; 
     
     for (int i = 0; i < VISION_QUERY_TABLE_SIZE; i++) {
         query_nodeT *node = table->nodes[i];
@@ -148,6 +229,9 @@ int empty_vision_query_table(vision_query_tableT *table) {
         }
         table->nodes[i] = NULL;
     }
+
+    empty_w_timestamps(table->w_timestamps);
+
     table->number_of_transactions = 0;
 
     return 0;
@@ -160,6 +244,10 @@ int destroy_vision_query_table(vision_query_tableT *table) {
 
     if (table->nodes != NULL) {
         free(table->nodes);
+    }
+
+    if (table->w_timestamps != NULL) {
+        free(table->w_timestamps);
     }
 
     free(table);
