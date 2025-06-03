@@ -96,7 +96,7 @@ vision_query_tableT *create_vision_query_table() {
     vision_query_tableT *table = (vision_query_tableT *) malloc(sizeof(vision_query_tableT));
     if (table == NULL) return NULL;
     
-    table->nodes = (query_nodeT **) malloc(CONFLICT_QUERY_TABLE_SIZE * sizeof(query_nodeT *));
+    table->nodes = (query_nodeT **) malloc(VISION_QUERY_TABLE_SIZE * sizeof(query_nodeT *));
     if (table->nodes == NULL) {
         free(table);
         return NULL;
@@ -132,14 +132,14 @@ int vision_query_table_insert(queryT *query, vision_query_tableT *table) {
         }
     }
 
-    perror("Tabela query de conflito cheia.");
+    perror("Tabela query de visão cheia.");
     return -1; 
 }
 
 int empty_vision_query_table(vision_query_tableT *table) {
     if (table == NULL || table->nodes == NULL) return -1; 
     
-    for (int i = 0; i < CONFLICT_QUERY_TABLE_SIZE; i++) {
+    for (int i = 0; i < VISION_QUERY_TABLE_SIZE; i++) {
         query_nodeT *node = table->nodes[i];
         while (node != NULL) {
             query_nodeT *next_node = node->next;
