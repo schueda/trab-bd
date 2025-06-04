@@ -117,7 +117,7 @@ int get_timestamp(char resource, w_timestampT **w_timestamps) {
 int serial_equivalent(query_nodeT **transactions, vision_query_tableT *table) {
     int n = table->number_of_transactions;
 
-    w_timestampT **w_timestamps = (w_timestampT **)malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
+    w_timestampT **w_timestamps = (w_timestampT **) malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
     if (w_timestamps == NULL)
         return 0;
 
@@ -139,6 +139,8 @@ int serial_equivalent(query_nodeT **transactions, vision_query_tableT *table) {
         if (w_timestamps[i] != NULL) {
             int og_timestamp = get_timestamp(w_timestamps[i]->resource, table->w_timestamps);
             if (og_timestamp != w_timestamps[i]->timestamp) {
+                empty_w_timestamps(w_timestamps);
+                free(w_timestamps);
                 return 0;
             }
         }
