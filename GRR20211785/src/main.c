@@ -1,10 +1,12 @@
 #include <stdio.h>
-#include "query/query.h"
-#include "conflict/conflict.h"
-#include "vision/vision.h"
-#include "graph/graph.h"
-#include "transaction/transaction.h"
 
+#include "conflict/conflict.h"
+#include "graph/graph.h"
+#include "query/query.h"
+#include "transaction/transaction.h"
+#include "vision/vision.h"
+
+/** @brief Tamanho do buffer para leitura de entrada */
 #define INPUT_BUFFER 64
 
 int main(int argc, char const *argv[]) {
@@ -58,7 +60,7 @@ int main(int argc, char const *argv[]) {
         } else {
             return 1;
         }
-    
+
         if (transaction_table->open_count <= 0 && present) {
             char tran_str[TRANSACTION_LIST_BUFFER] = "";
             list_transactions(tran_str, transaction_table);
@@ -79,7 +81,7 @@ int main(int argc, char const *argv[]) {
 
         destroy_query(query);
     }
-    
+
     destroy_transaction_table(transaction_table);
 
     destroy_graph(conflict_graph);
@@ -87,6 +89,6 @@ int main(int argc, char const *argv[]) {
     destroy_conflicts(conflicts);
 
     destroy_vision_query_table(vision_query_table);
-    
+
     return 0;
 }
