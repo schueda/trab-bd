@@ -71,8 +71,8 @@ int serial_equivalent(query_nodeT **transactions, vision_query_tableT *table) {
     int n = table->number_of_transactions;
  
     w_timestampT **w_timestamps = (w_timestampT **) malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
-    for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
-        query_nodeT *node_i = table->nodes[i];
+    for (int i = 0; i < n; i++) {
+        query_nodeT *node_i = transactions[i];
         while (node_i != NULL) {
             if (node_i->query->operation == WRITE) {
                 w_timestamps_insert(node_i->query, w_timestamps);
