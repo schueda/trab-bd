@@ -11,8 +11,10 @@
  */
 vertexT *create_vertex(int value) {
     vertexT *vertex = (vertexT *)malloc(sizeof(vertexT));
-    vertex->value = value;
+    if (vertex == NULL) return NULL;
 
+    vertex->value = value;
+    vertex->frontier = NULL;
     vertex->visited = 0;
     return vertex;
 }
@@ -177,11 +179,17 @@ void print_graph(graphT *graph) {
  * @return int 1 se encontrar um ciclo, 0 caso contrário
  */
 int dfs(vertexT *r) {
+    if (r == NULL) return -1;
+
     r->visited = 1;
 
     edgeT *edge = r->frontier;
     while (edge != NULL) {
         vertexT *neighbor = edge->to_vertex;
+        if (neighbor == NULL) {
+            edge = edge->next;
+            continue;
+        }
         if (neighbor->visited == 1) {
             return 1;
         } else if (neighbor->visited == 0) {
