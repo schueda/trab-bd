@@ -99,8 +99,7 @@ query_nodeT *create_query_node(queryT *query) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_query_node(query_nodeT *node) {
-    if (node == NULL)
-        return -1;
+    if (node == NULL) return -1;
 
     if (node->query != NULL) {
         free(node->query);

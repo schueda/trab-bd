@@ -54,6 +54,8 @@ conflictsT *create_conflicts() {
         return NULL;
     }
 
+    conflicts->count = 0;
+
     return conflicts;
 }
 
@@ -64,8 +66,7 @@ conflictsT *create_conflicts() {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_conflicts(conflictsT *conflicts) {
-    if (conflicts == NULL)
-        return -1;
+    if (conflicts == NULL) return -1;
 
     if (conflicts->transactions != NULL) {
         free(conflicts->transactions);
@@ -89,6 +90,10 @@ conflict_query_tableT *create_conflict_query_table() {
     if (table->nodes == NULL) {
         free(table);
         return NULL;
+    }
+
+    for (int i = 0; i < CONFLICT_QUERY_TABLE_SIZE; i++) {
+        table->nodes[i] = NULL;
     }
 
     return table;
@@ -117,8 +122,7 @@ int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
         return 0;
 
     if (qj->operation == WRITE || (qj->operation == READ && qi->operation == WRITE)) {
-        if (conflicts->count >= CONFLICTS_MAX_SIZE)
-            return -1;
+        if (conflicts->count >= CONFLICTS_MAX_SIZE) return -1;
 
         conflicts->transactions[conflicts->count++] = qi->transaction_id;
         return 1;
@@ -135,15 +139,13 @@ int compare(queryT *qi, queryT *qj, conflictsT *conflicts) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int conflict_query_table_insert(queryT *query, conflict_query_tableT *table, conflictsT *conflicts) {
-    if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL)
-        return -1;
+    if (query == NULL || table == NULL || table->nodes == NULL || conflicts == NULL || conflicts->transactions == NULL) return -1;
 
     for (int inc = 0; inc < CONFLICT_QUERY_TABLE_SIZE; inc++) {
         int query_hash = q_hash(query->resource + inc);
         if (table->nodes[query_hash] == NULL) {
             query_nodeT *query_node = create_query_node(query);
-            if (query_node == NULL)
-                return -1;
+            if (query_node == NULL) return -1;
 
             table->nodes[query_hash] = query_node;
             return 0;
@@ -171,8 +173,7 @@ int conflict_query_table_insert(queryT *query, conflict_query_tableT *table, con
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int empty_conflict_query_table(conflict_query_tableT *table) {
-    if (table == NULL || table->nodes == NULL)
-        return -1;
+    if (table == NULL || table->nodes == NULL) return -1;
 
     for (int i = 0; i < CONFLICT_QUERY_TABLE_SIZE; i++) {
         query_nodeT *node = table->nodes[i];
@@ -194,8 +195,7 @@ int empty_conflict_query_table(conflict_query_tableT *table) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_conflict_query_table(conflict_query_tableT *table) {
-    if (table == NULL)
-        return -1;
+    if (table == NULL) return -1;
 
     empty_conflict_query_table(table);
 

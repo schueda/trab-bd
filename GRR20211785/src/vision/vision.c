@@ -38,8 +38,7 @@ w_timestampT *create_w_timestamp(char resource, int timestamp) {
  * @return int 0 se inserido, 1 se atualizado, -1 em caso de erro
  */
 int w_timestamps_insert(queryT *query, w_timestampT **w_timestamps) {
-    if (query == NULL || w_timestamps == NULL)
-        return -1;
+    if (query == NULL || w_timestamps == NULL) return -1;
 
     for (int inc = 0; inc < VISION_RESOURCE_TABLE_SIZE; inc++) {
         int resource_hash = r_hash(query->resource + inc);
@@ -65,8 +64,7 @@ int w_timestamps_insert(queryT *query, w_timestampT **w_timestamps) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int vision_process_query(queryT *query, vision_query_tableT *table) {
-    if (query == NULL)
-        return -1;
+    if (query == NULL) return -1;
 
     vision_query_table_insert(query, table);
 
@@ -96,13 +94,11 @@ void swap(query_nodeT **n1, query_nodeT **n2) {
  * @return int Timestamp do recurso, ou -1 se não encontrado
  */
 int get_timestamp(char resource, w_timestampT **w_timestamps) {
-    if (w_timestamps == NULL)
-        return -1;
+    if (w_timestamps == NULL) return -1;
 
     for (int inc = 0; inc < VISION_RESOURCE_TABLE_SIZE; inc++) {
         int resource_hash = r_hash(resource + inc);
-        if (w_timestamps[resource_hash] == NULL)
-            return -1;
+        if (w_timestamps[resource_hash] == NULL) return -1;
 
         if (w_timestamps[resource_hash]->resource == resource)
             return w_timestamps[resource_hash]->timestamp;
@@ -122,6 +118,13 @@ int serial_equivalent(query_nodeT **transactions, vision_query_tableT *table) {
     int n = table->number_of_transactions;
 
     w_timestampT **w_timestamps = (w_timestampT **)malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
+    if (w_timestamps == NULL)
+        return 0;
+
+    for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
+        w_timestamps[i] = NULL;
+    }
+
     for (int i = 0; i < n; i++) {
         query_nodeT *node_i = transactions[i];
         while (node_i != NULL) {
@@ -197,10 +200,9 @@ int permute(query_nodeT **transactions, int n, vision_query_tableT *table) {
  * @return int 1 se for equivalente, 0 se não for, -1 em caso de erro
  */
 int check_equivalent_vision(vision_query_tableT *table) {
-    if (table == NULL || table->nodes == NULL)
-        return -1;
-    if (table->number_of_transactions == 0)
-        return 1;
+    if (table == NULL || table->nodes == NULL) return -1;
+
+    if (table->number_of_transactions == 0) return 1;
 
     query_nodeT **transactions = (query_nodeT **)malloc(table->number_of_transactions * sizeof(query_nodeT *));
     int t_pos = 0;
@@ -229,11 +231,20 @@ vision_query_tableT *create_vision_query_table() {
         free(table);
         return NULL;
     }
+
+    for (int i = 0; i < VISION_QUERY_TABLE_SIZE; i++) {
+        table->nodes[i] = NULL;
+    }
+
     table->w_timestamps = (w_timestampT **)malloc(VISION_RESOURCE_TABLE_SIZE * sizeof(w_timestampT *));
     if (table->w_timestamps == NULL) {
         free(table->nodes);
         free(table);
         return NULL;
+    }
+
+    for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
+        table->w_timestamps[i] = NULL;
     }
 
     table->number_of_transactions = 0;
@@ -258,15 +269,13 @@ int v_hash(int id) {
  * @return int 0 se inserida, 1 se atualizada, -1 em caso de erro
  */
 int vision_query_table_insert(queryT *query, vision_query_tableT *table) {
-    if (query == NULL || table == NULL || table->nodes == NULL)
-        return -1;
+    if (query == NULL || table == NULL || table->nodes == NULL) return -1;
 
     for (int inc = 0; inc < VISION_QUERY_TABLE_SIZE; inc++) {
         int query_hash = v_hash(query->transaction_id + inc);
         if (table->nodes[query_hash] == NULL) {
             query_nodeT *query_node = create_query_node(query);
-            if (query_node == NULL)
-                return -1;
+            if (query_node == NULL) return -1;
 
             table->nodes[query_hash] = query_node;
             table->number_of_transactions++;
@@ -291,8 +300,7 @@ int vision_query_table_insert(queryT *query, vision_query_tableT *table) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_w_timestamp(w_timestampT *w_timestamp) {
-    if (w_timestamp == NULL)
-        return -1;
+    if (w_timestamp == NULL) return -1;
 
     free(w_timestamp);
     return 0;
@@ -305,8 +313,7 @@ int destroy_w_timestamp(w_timestampT *w_timestamp) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int empty_w_timestamps(w_timestampT **w_timestamps) {
-    if (w_timestamps == NULL)
-        return -1;
+    if (w_timestamps == NULL) return -1;
 
     for (int i = 0; i < VISION_RESOURCE_TABLE_SIZE; i++) {
         if (w_timestamps[i] != NULL) {
@@ -325,8 +332,7 @@ int empty_w_timestamps(w_timestampT **w_timestamps) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int empty_vision_query_table(vision_query_tableT *table) {
-    if (table == NULL || table->nodes == NULL || table->w_timestamps == NULL)
-        return -1;
+    if (table == NULL || table->nodes == NULL || table->w_timestamps == NULL) return -1;
 
     for (int i = 0; i < VISION_QUERY_TABLE_SIZE; i++) {
         query_nodeT *node = table->nodes[i];
@@ -352,8 +358,7 @@ int empty_vision_query_table(vision_query_tableT *table) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_vision_query_table(vision_query_tableT *table) {
-    if (table == NULL)
-        return -1;
+    if (table == NULL) return -1;
 
     empty_vision_query_table(table);
 

@@ -1,4 +1,3 @@
-
 #include "graph.h"
 
 #include <stdio.h>
@@ -25,8 +24,7 @@ vertexT *create_vertex(int value) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_vertex(vertexT *vertex) {
-    if (vertex == NULL)
-        return -1;
+    if (vertex == NULL) return -1;
 
     free(vertex);
     return 0;
@@ -56,8 +54,7 @@ edgeT *create_edge(vertexT *dest_vertex) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_edge(edgeT *edge) {
-    if (edge == NULL)
-        return -1;
+    if (edge == NULL) return -1;
 
     free(edge);
     return 0;
@@ -70,10 +67,16 @@ int destroy_edge(edgeT *edge) {
  */
 graphT *create_graph() {
     graphT *graph = (graphT *)malloc(sizeof(graphT));
+    if (graph == NULL) return NULL;
+
     graph->vertices = (vertexT **)malloc(MAX_VERTICES * sizeof(vertexT *));
     if (graph->vertices == NULL) {
         free(graph);
         return NULL;
+    }
+
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        graph->vertices[i] = NULL;
     }
 
     return graph;
@@ -124,10 +127,8 @@ vertexT *get_vertex(graphT *graph, int value) {
  * @return int 1 se a aresta foi adicionada, 0 se já existia, -1 em caso de erro
  */
 int add_edge(graphT *graph, vertexT *origin_vertex, vertexT *dest_vertex) {
-    if (graph == NULL)
-        return -1;
-    if (origin_vertex == NULL || dest_vertex == NULL)
-        return -1;
+    if (graph == NULL) return -1;
+    if (origin_vertex == NULL || dest_vertex == NULL) return -1;
 
     if (origin_vertex->frontier == NULL) {
         origin_vertex->frontier = create_edge(dest_vertex);
@@ -153,8 +154,7 @@ int add_edge(graphT *graph, vertexT *origin_vertex, vertexT *dest_vertex) {
  * @param graph Ponteiro para o grafo a ser impresso
  */
 void print_graph(graphT *graph) {
-    if (graph == NULL || graph->vertices == NULL)
-        return;
+    if (graph == NULL || graph->vertices == NULL) return;
 
     for (int i = 0; i < MAX_VERTICES; i++) {
         if (graph->vertices[i] != NULL) {
@@ -203,8 +203,7 @@ int dfs(vertexT *r) {
  * @return int 1 se houver ciclos, 0 se não houver, -1 em caso de erro
  */
 int check_for_cycles(graphT *graph) {
-    if (graph == NULL || graph->vertices == NULL)
-        return -1;
+    if (graph == NULL || graph->vertices == NULL) return -1;
 
     for (int i = 0; i < MAX_VERTICES; i++) {
         vertexT *cur_vertex = graph->vertices[i];
@@ -224,8 +223,7 @@ int check_for_cycles(graphT *graph) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int empty_graph(graphT *graph) {
-    if (graph == NULL || graph->vertices == NULL)
-        return -1;
+    if (graph == NULL || graph->vertices == NULL) return -1;
 
     for (int i = 0; i < MAX_VERTICES; i++) {
         vertexT *vertex = graph->vertices[i];
@@ -251,8 +249,8 @@ int empty_graph(graphT *graph) {
  * @return int 0 em caso de sucesso, -1 em caso de erro
  */
 int destroy_graph(graphT *graph) {
-    if (graph == NULL)
-        return -1;
+    if (graph == NULL) return -1;
+
     empty_graph(graph);
     if (graph->vertices != NULL) {
         free(graph->vertices);
